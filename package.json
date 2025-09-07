@@ -1,0 +1,13 @@
+{
+    "name": "rps-betting",
+    "version": "1.0.0",
+    "description": "Rock Paper Scissors Betting Game",
+    "main": "index.html",
+    "scripts": {
+        "build": "echo 'No build step required for static site'",
+        "start": "echo 'No server required for static site'"
+    },
+    "keywords": ["game", "betting", "rps"],
+    "author": "Your Name",
+    "license": "MIT"
+}
