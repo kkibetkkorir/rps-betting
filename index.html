@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rock Paper Scissors | Betting Game</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <style>
+    /* CSS from the original game interface */
+    :root {
+      --primary: #4a6fa5;
+      --primary-light: #6b8cbe;
+      --secondary: #ff6b6b;
+      --success: #4caf50;
+      --warning: #ff9800;
+      --dark: #2d3436;
+      --light: #f5f5f5;
+      --gray: #dfe6e9;
+      --card-bg: #ffffff;
+      --text: #2d3436;
+      --text-light: #636e72;
+      --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      --radius: 12px;
+      --transition: all 0.3s ease;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      width: 100%;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 600;
+      font-size: 1.4rem;
+      color: var(--primary);
+    }
+
+    .logo i {
+      font-size: 1.8rem;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .balance {
+      background: var(--primary);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-weight: 500;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: var(--radius);
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      font-size: 0.9rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-light);
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--primary);
+      color: var(--primary);
+    }
+
+    .btn-outline:hover {
+      background: var(--primary);
+      color: white;
+    }
+
+    .game-container {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 25px;
+      width: 100%;
+    }
+
+    @media (min-width: 768px) {
+      .game-container {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 25px;
+      box-shadow: var(--shadow);
+      transition: var(--transition);
+    }
+
+    .card:hover {
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+    }
+
+    .section-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--primary);
+      text-align: center;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .choices-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .btns {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+    }
+
+    .choice-btn {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      border: none;
+      background: var(--light);
+      font-size: 2.5rem;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow);
+    }
+
+    .choice-btn:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .choice-btn:active {
+      transform: translateY(0);
+    }
+
+    #rock {
+      background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
+    }
+
+    #paper {
+      background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
+    }
+
+    #scissors {
+      background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+    }
+
+    .computer-choice {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+
+    #animation {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: var(--light);
+      font-size: 3.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow);
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    }
+
+    .betting-panel {
+      grid-column: span 1;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    @media (min-width: 768px) {
+      .betting-panel {
+        grid-column: span 2;
+      }
+    }
+
+    .bet-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .bet-amount {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .bet-amount input {
+      flex: 1;
+      padding: 12px 15px;
+      border: 1px solid var(--gray);
+      border-radius: var(--radius);
+      font-size: 1rem;
+      transition: var(--transition);
+    }
+
+    .bet-amount input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(74, 111, 165, 0.2);
+    }
+
+    .quick-bets {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .quick-bet {
+      padding: 8px 15px;
+      background: var(--light);
+      border: 1px solid var(--gray);
+      border-radius: 20px;
+      cursor: pointer;
+      transition: var(--transition);
+      font-size: 0.9rem;
+    }
+
+    .quick-bet:hover {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    .place-bet {
+      padding: 12px 25px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: var(--radius);
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      font-size: 1rem;
+      margin-top: 10px;
+    }
+
+    .place-bet:hover {
+      background: var(--primary-light);
+    }
+
+    .place-bet:disabled {
+      background: var(--gray);
+      cursor: not-allowed;
+    }
+
+    #result {
+      font-size: 1.1rem;
+      text-align: center;
+      padding: 20px;
+      border-radius: var(--radius);
+      margin-top: 20px;
+      background: var(--card-bg);
+      box-shadow: var(--shadow);
+      transition: var(--transition);
+    }
+
+    .win {
+      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      color: white;
+    }
+
+    .loss {
+      background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+      color: white;
+    }
+
+    .draw {
+      background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+      color: var(--text);
+    }
+
+    .history-panel {
+      grid-column: span 1;
+    }
+
+    @media (min-width: 768px) {
+      .history-panel {
+        grid-column: span 2;
+      }
+    }
+
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 200px;
+      overflow-y: auto;
+      padding: 10px;
+      border-radius: var(--radius);
+      background: var(--light);
+    }
+
+    .history-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 15px;
+      border-radius: var(--radius);
+      background: var(--card-bg);
+      font-size: 0.9rem;
+    }
+
+    .history-item.win {
+      border-left: 4px solid var(--success);
+    }
+
+    .history-item.loss {
+      border-left: 4px solid var(--secondary);
+    }
+
+    .history-item.draw {
+      border-left: 4px solid var(--warning);
+    }
+
+    @keyframes fireworks {
+      0% {
+        opacity: 1;
+        transform: scale(0);
+      }
+      80% {
+        opacity: 1;
+        transform: scale(1);
+      }
+      100% {
+        opacity: 0;
+        transform: scale(1.2);
+      }
+    }
+
+    .firework {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(255,0,0,1) 40%, rgba(255,255,0,1) 60%, rgba(255,255,255,0) 100%);
+      animation: fireworks 1s ease-out forwards;
+    }
+
+    #fireworks-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    footer {
+      margin-top: 40px;
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--text-light);
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 600px) {
+      header {
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      .btns {
+        flex-wrap: wrap;
+      }
+
+      .choice-btn {
+        width: 70px;
+        height: 70px;
+        font-size: 2rem;
+      }
+
+      #animation {
+        width: 100px;
+        height: 100px;
+        font-size: 2.8rem;
+      }
+
+      .quick-bets {
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <a href="index.html" class="logo">
+        <i class="fas fa-hand-scissors"></i>
+        <span>RPS Betting</span>
+      </a>
+      <div class="user-info">
+        <div class="balance">
+          <i class="fas fa-wallet"></i>
+          <span id="balance">$100.00</span>
+        </div>
+        <a href="account.html" class="btn btn-outline">
+          <i class="fas fa-user"></i>
+          <span>Account</span>
+        </a>
+        <button class="btn btn-outline" id="logoutBtn">
+          <i class="fas fa-sign-out-alt"></i>
+          <span>Logout</span>
+        </button>
+      </div>
+    </header>
+
+    <div class="game-container">
+      <div class="card choices-container">
+        <h2 class="section-title">
+          <i class="fas fa-user"></i>
+          <span>Your Choice</span>
+        </h2>
+        <div class="btns">
+          <button id="rock" class="choice-btn">✊</button>
+          <button id="paper" class="choice-btn">✋</button>
+          <button id="scissors" class="choice-btn">✌️</button>
+        </div>
+      </div>
+
+      <div class="card computer-choice">
+        <h2 class="section-title">
+          <i class="fas fa-laptop"></i>
+          <span>Computer</span>
+        </h2>
+        <div id="animation">✊</div>
+      </div>
+
+      <div class="card betting-panel">
+        <h2 class="section-title">
+          <i class="fas fa-coins"></i>
+          <span>Place Your Bet</span>
+        </h2>
+        <div class="bet-controls">
+          <div class="bet-amount">
+            <i class="fas fa-dollar-sign"></i>
+            <input type="number" id="betAmount" min="1" value="10" step="1" placeholder="Bet amount">
+          </div>
+          <div class="quick-bets">
+            <button class="quick-bet" data-amount="5">$5</button>
+            <button class="quick-bet" data-amount="10">$10</button>
+            <button class="quick-bet" data-amount="25">$25</button>
+            <button class="quick-bet" data-amount="50">$50</button>
+            <button class="quick-bet" data-amount="100">$100</button>
+          </div>
+          <button id="placeBet" class="place-bet">Place Bet</button>
+        </div>
+      </div>
+
+      <div id="result">Place a bet and make your choice to play</div>
+
+      <div class="card history-panel">
+        <h2 class="section-title">
+          <i class="fas fa-history"></i>
+          <span>Game History</span>
+        </h2>
+        <div class="history-list" id="historyList">
+          <!-- History items will be added here -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="fireworks-container"></div>
+
+  <footer>
+    <p>Play responsibly | Must be 18+ to play | © 2023 RPS Betting</p>
+  </footer>
+
+  <script src="firebase-config.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      // Check authentication state
+      auth.onAuthStateChanged((user) => {
+        if (!user) {
+          window.location.href = 'get-started.html';
+        } else {
+          // Load user data
+          loadUserData(user.uid);
+        }
+      });
+
+      // Game state
+      const gameState = {
+        choices: ["rock", "paper", "scissors"],
+        emojiMap: {
+          rock: "✊",
+          paper: "✋",
+          scissors: "✌️"
+        },
+        currentBet: 0,
+        isBetPlaced: false,
+        userBalance: 100,
+        gameHistory: []
+      };
+
+      // DOM elements
+      const elements = {
+        rock: document.getElementById("rock"),
+        paper: document.getElementById("paper"),
+        scissors: document.getElementById("scissors"),
+        animation: document.getElementById("animation"),
+        result: document.getElementById("result"),
+        fireworksContainer: document.getElementById("fireworks-container"),
+        betAmount: document.getElementById("betAmount"),
+        placeBet: document.getElementById("placeBet"),
+        historyList: document.getElementById("historyList"),
+        balance: document.getElementById("balance"),
+        quickBets: document.querySelectorAll(".quick-bet"),
+        logoutBtn: document.getElementById("logoutBtn")
+      };
+
+      let animationInterval;
+
+      // Initialize the game
+      function initGame() {
+        updateUI();
+        setupEventListeners();
+      }
+
+      // Load user data from Firestore
+      function loadUserData(userId) {
+        db.collection('users').doc(userId).get()
+          .then((doc) => {
+            if (doc.exists) {
+              const userData = doc.data();
+              gameState.userBalance = userData.balance;
+              elements.balance.textContent = `$${gameState.userBalance.toFixed(2)}`;
+
+              // Load game history
+              if (userData.gameHistory) {
+                gameState.gameHistory = userData.gameHistory;
+                renderHistory();
+              }
+            }
+          })
+          .catch((error) => {
+            console.error("Error loading user data:", error);
+          });
+      }
+
+      // Save user data to Firestore
+      function saveUserData(userId) {
+        db.collection('users').doc(userId).update({
+          balance: gameState.userBalance,
+          gameHistory: gameState.gameHistory
+        })
+        .catch((error) => {
+          console.error("Error saving user data:", error);
+        });
+      }
+
+      // Update UI based on game state
+      function updateUI() {
+        elements.balance.textContent = `$${gameState.userBalance.toFixed(2)}`;
+        renderHistory();
+        validateBetAmount();
+      }
+
+      // Render game history
+      function renderHistory() {
+        elements.historyList.innerHTML = "";
+
+        if (gameState.gameHistory.length === 0) {
+          const emptyMessage = document.createElement("div");
+          emptyMessage.className = "history-item";
+          emptyMessage.textContent = "No games played yet";
+          elements.historyList.appendChild(emptyMessage);
+          return;
+        }
+
+        gameState.gameHistory.slice().reverse().forEach(item => {
+          const historyItem = document.createElement("div");
+          historyItem.className = `history-item ${item.result}`;
+
+          const choiceElement = document.createElement("span");
+          choiceElement.textContent = `${gameState.emojiMap[item.playerChoice]} vs ${gameState.emojiMap[item.computerChoice]}`;
+
+          const resultElement = document.createElement("span");
+          let resultText = "";
+          if (item.result === "win") {
+            resultText = `+$${item.amount.toFixed(2)}`;
+          } else if (item.result === "loss") {
+            resultText = `-$${item.amount.toFixed(2)}`;
+          } else {
+            resultText = "Draw";
+          }
+          resultElement.textContent = resultText;
+
+          historyItem.appendChild(choiceElement);
+          historyItem.appendChild(resultElement);
+          elements.historyList.appendChild(historyItem);
+        });
+      }
+
+      // Setup event listeners
+      function setupEventListeners() {
+        // Game buttons
+        elements.rock.addEventListener("click", () => playGame("rock"));
+        elements.paper.addEventListener("click", () => playGame("paper"));
+        elements.scissors.addEventListener("click", () => playGame("scissors"));
+
+        // Betting controls
+        elements.placeBet.addEventListener("click", placeBet);
+        elements.betAmount.addEventListener("input", validateBetAmount);
+
+        // Quick bet buttons
+        elements.quickBets.forEach(button => {
+          button.addEventListener("click", function() {
+            const amount = parseFloat(this.dataset.amount);
+            elements.betAmount.value = amount;
+            validateBetAmount();
+          });
+        });
+
+        // Logout button
+        elements.logoutBtn.addEventListener("click", function() {
+          auth.signOut().then(() => {
+            window.location.href = 'get-started.html';
+          });
+        });
+      }
+
+      // Validate bet amount
+      function validateBetAmount() {
+        const amount = parseFloat(elements.betAmount.value);
+        if (isNaN(amount) || amount <= 0 || amount > gameState.userBalance) {
+          elements.placeBet.disabled = true;
+        } else {
+          elements.placeBet.disabled = false;
+        }
+      }
+
+      // Place bet
+      function placeBet() {
+        const amount = parseFloat(elements.betAmount.value);
+        if (isNaN(amount) || amount <= 0 || amount > gameState.userBalance) {
+          elements.result.textContent = "Invalid bet amount!";
+          elements.result.className = "loss";
+          return;
+        }
+
+        gameState.currentBet = amount;
+        gameState.isBetPlaced = true;
+        elements.placeBet.disabled = true;
+        elements.result.textContent = `Bet placed: $${amount.toFixed(2)}. Choose your move!`;
+        elements.result.className = "";
+      }
+
+      // Play game
+      function playGame(playerChoice) {
+        if (!gameState.isBetPlaced) {
+          elements.result.textContent = "Please place a bet first!";
+          elements.result.className = "loss";
+          return;
+        }
+
+        const computerChoice = gameState.choices[Math.floor(Math.random() * gameState.choices.length)];
+
+        // Show animation
+        clearInterval(animationInterval);
+        let currentIndex = 0;
+
+        animationInterval = setInterval(() => {
+          elements.animation.textContent = gameState.emojiMap[gameState.choices[currentIndex]];
+          currentIndex = (currentIndex + 1) % gameState.choices.length;
+        }, 100);
+
+        // Disable buttons during animation
+        elements.rock.disabled = true;
+        elements.paper.disabled = true;
+        elements.scissors.disabled = true;
+        elements.placeBet.disabled = true;
+
+        setTimeout(() => {
+          clearInterval(animationInterval);
+          elements.animation.textContent = gameState.emojiMap[computerChoice];
+          displayResult(playerChoice, computerChoice);
+
+          // Re-enable buttons
+          elements.rock.disabled = false;
+          elements.paper.disabled = false;
+          elements.scissors.disabled = false;
+          elements.placeBet.disabled = false;
+
+          // Reset bet state
+          gameState.isBetPlaced = false;
+        }, 1500);
+      }
+
+      // Display result
+      function displayResult(playerChoice, computerChoice) {
+        let result = "";
+        let resultClass = "";
+        let amountWon = 0;
+
+        if (playerChoice === computerChoice) {
+          result = `It's a draw! ${gameState.emojiMap[playerChoice]} vs ${gameState.emojiMap[computerChoice]}. Your bet of $${gameState.currentBet.toFixed(2)} is returned.`;
+          resultClass = "draw";
+          amountWon = 0;
+        } else if (
+          (playerChoice === "rock" && computerChoice === "scissors") ||
+          (playerChoice === "paper" && computerChoice === "rock") ||
+          (playerChoice === "scissors" && computerChoice === "paper")
+        ) {
+          amountWon = gameState.currentBet * 1.5; // 1.5x payout for wins
+          gameState.userBalance += amountWon;
+          result = `You win! ${gameState.emojiMap[playerChoice]} beats ${gameState.emojiMap[computerChoice]}. You win $${amountWon.toFixed(2)}!`;
+          resultClass = "win";
+          triggerFireworks();
+        } else {
+          gameState.userBalance -= gameState.currentBet;
+          result = `You lose! ${gameState.emojiMap[computerChoice]} beats ${gameState.emojiMap[playerChoice]}. You lose $${gameState.currentBet.toFixed(2)}.`;
+          resultClass = "loss";
+        }
+
+        // Add to history
+        gameState.gameHistory.push({
+          playerChoice,
+          computerChoice,
+          amount: resultClass === "win" ? amountWon : gameState.currentBet,
+          result: resultClass,
+          timestamp: new Date()
+        });
+
+        // Update UI
+        elements.result.textContent = result;
+        elements.result.className = resultClass;
+        updateUI();
+
+        // Save user data to Firestore
+        auth.onAuthStateChanged((user) => {
+          if (user) {
+            saveUserData(user.uid);
+          }
+        });
+      }
+
+      // Trigger fireworks animation
+      function triggerFireworks() {
+        elements.fireworksContainer.innerHTML = "";
+
+        for (let i = 0; i < 15; i++) {
+          const firework = document.createElement("div");
+          firework.className = "firework";
+          firework.style.left = `${Math.random() * 100}%`;
+          firework.style.top = `${Math.random() * 100}%`;
+          firework.style.animationDelay = `${Math.random() * 0.5}s`;
+
+          // Random color
+          const hue = Math.random() * 360;
+          firework.style.background = `radial-gradient(circle, rgba(255,255,255,1) 0%, hsl(${hue}, 100%, 50%) 40%, hsl(${(hue + 60) % 360}, 100%, 50%) 60%, rgba(255,255,255,0) 100%)`;
+
+          elements.fireworksContainer.appendChild(firework);
+
+          setTimeout(() => {
+            firework.remove();
+          }, 1000);
+        }
+      }
+
+      // Initialize the game
+      initGame();
+    });
+  </script>
+</body>
+</html>

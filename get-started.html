@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RPS Betting | Get Started</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <style>
+    :root {
+      --primary: #4a6fa5;
+      --primary-light: #6b8cbe;
+      --secondary: #ff6b6b;
+      --success: #4caf50;
+      --warning: #ff9800;
+      --dark: #2d3436;
+      --light: #f5f5f5;
+      --gray: #dfe6e9;
+      --card-bg: #ffffff;
+      --text: #2d3436;
+      --text-light: #636e72;
+      --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      --radius: 12px;
+      --transition: all 0.3s ease;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .auth-container {
+      width: 100%;
+      max-width: 450px;
+      margin: 0 auto;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      font-weight: 600;
+      font-size: 1.8rem;
+      color: var(--primary);
+      margin-bottom: 30px;
+      text-decoration: none;
+    }
+
+    .logo i {
+      font-size: 2.2rem;
+    }
+
+    .auth-tabs {
+      display: flex;
+      gap: 5px;
+      background: white;
+      padding: 5px;
+      border-radius: var(--radius);
+      margin-bottom: 25px;
+      box-shadow: var(--shadow);
+    }
+
+    .auth-tab {
+      flex: 1;
+      padding: 12px 20px;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: var(--transition);
+      font-weight: 500;
+      font-size: 0.9rem;
+      text-align: center;
+    }
+
+    .auth-tab.active {
+      background: var(--primary);
+      color: white;
+    }
+
+    .auth-tab:hover:not(.active) {
+      background: var(--light);
+    }
+
+    .auth-card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 30px;
+      box-shadow: var(--shadow);
+      transition: var(--transition);
+      margin-bottom: 20px;
+    }
+
+    .auth-card:hover {
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+    }
+
+    .auth-title {
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: var(--primary);
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      font-size: 0.9rem;
+      color: var(--text);
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 12px 15px;
+      border: 1px solid var(--gray);
+      border-radius: var(--radius);
+      font-size: 1rem;
+      transition: var(--transition);
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(74, 111, 165, 0.2);
+    }
+
+    .password-toggle {
+      position: relative;
+    }
+
+    .password-toggle .form-control {
+      padding-right: 45px;
+    }
+
+    .toggle-password {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--text-light);
+      cursor: pointer;
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 14px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: var(--radius);
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      font-size: 1rem;
+      margin-top: 10px;
+    }
+
+    .submit-btn:hover {
+      background: var(--primary-light);
+    }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      margin: 25px 0;
+    }
+
+    .divider::before,
+    .divider::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background-color: var(--gray);
+    }
+
+    .divider span {
+      padding: 0 15px;
+      color: var(--text-light);
+      font-size: 0.9rem;
+    }
+
+    .google-auth-btn {
+      width: 100%;
+      padding: 12px;
+      background: white;
+      color: var(--text);
+      border: 1px solid var(--gray);
+      border-radius: var(--radius);
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .google-auth-btn:hover {
+      background: var(--light);
+    }
+
+    .auth-footer {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 0.9rem;
+      color: var(--text-light);
+    }
+
+    .auth-footer a {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .auth-footer a:hover {
+      text-decoration: underline;
+    }
+
+    .terms-text {
+      font-size: 0.8rem;
+      color: var(--text-light);
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .terms-text a {
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    .terms-text a:hover {
+      text-decoration: underline;
+    }
+
+    .error-message {
+      background-color: #ffebee;
+      color: #c62828;
+      padding: 10px;
+      border-radius: var(--radius);
+      margin-bottom: 15px;
+      font-size: 0.9rem;
+      display: none;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 480px) {
+      .auth-card {
+        padding: 20px;
+      }
+
+      .auth-tab {
+        padding: 10px 15px;
+        font-size: 0.8rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="auth-container">
+    <a href="index.html" class="logo">
+      <i class="fas fa-hand-scissors"></i>
+      <span>RPS Betting</span>
+    </a>
+
+    <div class="auth-tabs">
+      <div class="auth-tab active" id="login-tab">Login</div>
+      <div class="auth-tab" id="register-tab">Register</div>
+    </div>
+
+    <!-- Login Form -->
+    <div class="auth-card" id="login-form">
+      <h2 class="auth-title">Welcome Back</h2>
+      <div class="error-message" id="login-error"></div>
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="login-email">Email Address</label>
+          <input type="email" id="login-email" class="form-control" placeholder="Enter your email" required>
+        </div>
+        <div class="form-group password-toggle">
+          <label for="login-password">Password</label>
+          <input type="password" id="login-password" class="form-control" placeholder="Enter your password" required>
+          <button type="button" class="toggle-password" id="toggle-login-password">
+            <i class="far fa-eye"></i>
+          </button>
+        </div>
+        <div style="text-align: right; margin-bottom: 15px;">
+          <a href="#" id="forgot-password" style="color: var(--primary); text-decoration: none; font-size: 0.9rem;">Forgot Password?</a>
+        </div>
+        <button type="submit" class="submit-btn">Login to Account</button>
+      </form>
+
+      <div class="divider">
+        <span>Or continue with</span>
+      </div>
+
+      <button class="google-auth-btn" id="google-login">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google logo" width="20" height="20">
+        Sign in with Google
+      </button>
+
+      <div class="auth-footer">
+        Don't have an account? <a href="#" id="switch-to-register">Register now</a>
+      </div>
+    </div>
+
+    <!-- Register Form -->
+    <div class="auth-card" id="register-form" style="display: none;">
+      <h2 class="auth-title">Create Account</h2>
+      <div class="error-message" id="register-error"></div>
+      <form id="registerForm">
+        <div class="form-group">
+          <label for="register-username">Username</label>
+          <input type="text" id="register-username" class="form-control" placeholder="Choose a username" required>
+        </div>
+        <div class="form-group">
+          <label for="register-email">Email Address</label>
+          <input type="email" id="register-email" class="form-control" placeholder="Enter your email" required>
+        </div>
+        <div class="form-group password-toggle">
+          <label for="register-password">Password</label>
+          <input type="password" id="register-password" class="form-control" placeholder="Create a password" required>
+          <button type="button" class="toggle-password" id="toggle-register-password">
+            <i class="far fa-eye"></i>
+          </button>
+        </div>
+        <div class="form-group password-toggle">
+          <label for="register-confirm-password">Confirm Password</label>
+          <input type="password" id="register-confirm-password" class="form-control" placeholder="Confirm your password" required>
+          <button type="button" class="toggle-password" id="toggle-register-confirm-password">
+            <i class="far fa-eye"></i>
+          </button>
+        </div>
+        <button type="submit" class="submit-btn">Create Account</button>
+      </form>
+
+      <div class="divider">
+        <span>Or sign up with</span>
+      </div>
+
+      <button class="google-auth-btn" id="google-register">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google logo" width="20" height="20">
+        Sign up with Google
+      </button>
+
+      <div class="auth-footer">
+        Already have an account? <a href="#" id="switch-to-login">Login now</a>
+      </div>
+
+      <div class="terms-text">
+        By creating an account, you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
+      </div>
+    </div>
+  </div>
+
+  <script src="firebase-config.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      // DOM elements
+      const loginTab = document.getElementById('login-tab');
+      const registerTab = document.getElementById('register-tab');
+      const loginForm = document.getElementById('login-form');
+      const registerForm = document.getElementById('register-form');
+      const switchToRegister = document.getElementById('switch-to-register');
+      const switchToLogin = document.getElementById('switch-to-login');
+      const loginError = document.getElementById('login-error');
+      const registerError = document.getElementById('register-error');
+
+      // Password toggle functionality
+      const toggleLoginPassword = document.getElementById('toggle-login-password');
+      const loginPassword = document.getElementById('login-password');
+
+      const toggleRegisterPassword = document.getElementById('toggle-register-password');
+      const registerPassword = document.getElementById('register-password');
+
+      const toggleRegisterConfirmPassword = document.getElementById('toggle-register-confirm-password');
+      const registerConfirmPassword = document.getElementById('register-confirm-password');
+
+      // Switch between login and register forms
+      function showLoginForm() {
+        loginTab.classList.add('active');
+        registerTab.classList.remove('active');
+        loginForm.style.display = 'block';
+        registerForm.style.display = 'none';
+        loginError.style.display = 'none';
+        registerError.style.display = 'none';
+      }
+
+      function showRegisterForm() {
+        loginTab.classList.remove('active');
+        registerTab.classList.add('active');
+        loginForm.style.display = 'none';
+        registerForm.style.display = 'block';
+        loginError.style.display = 'none';
+        registerError.style.display = 'none';
+      }
+
+      // Event listeners for tab switching
+      loginTab.addEventListener('click', showLoginForm);
+      registerTab.addEventListener('click', showRegisterForm);
+      switchToRegister.addEventListener('click', function(e) {
+        e.preventDefault();
+        showRegisterForm();
+      });
+      switchToLogin.addEventListener('click', function(e) {
+        e.preventDefault();
+        showLoginForm();
+      });
+
+      // Password visibility toggle
+      function setupPasswordToggle(toggleButton, passwordField) {
+        toggleButton.addEventListener('click', function() {
+          const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+          passwordField.setAttribute('type', type);
+
+          // Toggle eye icon
+          const eyeIcon = this.querySelector('i');
+          if (type === 'text') {
+            eyeIcon.classList.remove('fa-eye');
+            eyeIcon.classList.add('fa-eye-slash');
+          } else {
+            eyeIcon.classList.remove('fa-eye-slash');
+            eyeIcon.classList.add('fa-eye');
+          }
+        });
+      }
+
+      setupPasswordToggle(toggleLoginPassword, loginPassword);
+      setupPasswordToggle(toggleRegisterPassword, registerPassword);
+      setupPasswordToggle(toggleRegisterConfirmPassword, registerConfirmPassword);
+
+      // Form submissions
+      document.getElementById('loginForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const email = document.getElementById('login-email').value;
+        const password = document.getElementById('login-password').value;
+
+        loginError.style.display = 'none';
+
+        // Firebase login
+        auth.signInWithEmailAndPassword(email, password)
+          .then((userCredential) => {
+            // Signed in
+            window.location.href = 'index.html';
+          })
+          .catch((error) => {
+            loginError.textContent = error.message;
+            loginError.style.display = 'block';
+          });
+      });
+
+      document.getElementById('registerForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const username = document.getElementById('register-username').value;
+        const email = document.getElementById('register-email').value;
+        const password = document.getElementById('register-password').value;
+        const confirmPassword = document.getElementById('register-confirm-password').value;
+
+        registerError.style.display = 'none';
+
+        if (password !== confirmPassword) {
+          registerError.textContent = 'Passwords do not match!';
+          registerError.style.display = 'block';
+          return;
+        }
+
+        // Firebase registration
+        auth.createUserWithEmailAndPassword(email, password)
+          .then((userCredential) => {
+            // Signed up
+            const user = userCredential.user;
+
+            // Create user document in Firestore
+            return db.collection('users').doc(user.uid).set({
+              username: username,
+              email: email,
+              balance: 100.00,
+              createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+          })
+          .then(() => {
+            window.location.href = 'index.html';
+          })
+          .catch((error) => {
+            registerError.textContent = error.message;
+            registerError.style.display = 'block';
+          });
+      });
+
+      // Google authentication
+      function signInWithGoogle() {
+        const provider = new firebase.auth.GoogleAuthProvider();
+
+        auth.signInWithPopup(provider)
+          .then((result) => {
+            const user = result.user;
+
+            // Check if user document exists
+            const userDocRef = db.collection('users').doc(user.uid);
+
+            userDocRef.get().then((doc) => {
+              if (!doc.exists) {
+                // Create user document if it doesn't exist
+                return userDocRef.set({
+                  username: user.displayName || user.email.split('@')[0],
+                  email: user.email,
+                  balance: 100.00,
+                  createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+              }
+            }).then(() => {
+              window.location.href = 'index.html';
+            });
+          })
+          .catch((error) => {
+            const errorMessage = error.message;
+            if (loginForm.style.display !== 'none') {
+              loginError.textContent = errorMessage;
+              loginError.style.display = 'block';
+            } else {
+              registerError.textContent = errorMessage;
+              registerError.style.display = 'block';
+            }
+          });
+      }
+
+      document.getElementById('google-login').addEventListener('click', signInWithGoogle);
+      document.getElementById('google-register').addEventListener('click', signInWithGoogle);
+
+      // Password reset
+      document.getElementById('forgot-password').addEventListener('click', function(e) {
+        e.preventDefault();
+        const email = prompt('Please enter your email address:');
+
+        if (email) {
+          auth.sendPasswordResetEmail(email)
+            .then(() => {
+              alert('Password reset email sent! Check your inbox.');
+            })
+            .catch((error) => {
+              alert('Error: ' + error.message);
+            });
+        }
+      });
+
+      // Check if user is already logged in
+      auth.onAuthStateChanged((user) => {
+        if (user) {
+          window.location.href = 'index.html';
+        }
+      });
+    });
+  </script>
+</body>
+</html>
