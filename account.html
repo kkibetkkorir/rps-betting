@@ -411,7 +411,7 @@
         <div class="profile-stats">
           <div class="stat-card">
             <div class="stat-label">Total Games</div>
-            <div class="stat-value total">142</div>
+            <div class="stat-value total-games">142</div>
           </div>
           <div class="stat-card">
             <div class="stat-label">Win Rate</div>
@@ -419,11 +419,11 @@
           </div>
           <div class="stat-card">
             <div class="stat-label">Total Wagered</div>
-            <div class="stat-value wagered">$4,250</div>
+            <div class="stat-value total-wagered">$4,250</div>
           </div>
           <div class="stat-card">
             <div class="stat-label">Total Won</div>
-            <div class="stat-value won">$2,890</div>
+            <div class="stat-value total-won">$2,890</div>
           </div>
         </div>
       </div>
@@ -833,8 +833,29 @@
         return date.toLocaleDateString();
       }
 
+      const totalGame = 0;
+      const wins = 0;
+      const wagered = 0;
+      const totalWon = 0;
+
+      let winRate;
+
       // Display history items (show most recent first)
       historyData.slice().reverse().forEach(item => {
+        totalGame += 1;
+        if(item.result === "win"){
+          wins += 1;
+          totalWon += item.amount;
+        } else if(item.result === "loss"){
+          wagered += item.amount;
+        }
+
+        if(historyData[item] === historyData.length -1){
+          winRate = ((win * 100) / totalGame).toFixed(2)
+        }
+
+
+
         const historyItem = document.createElement("div");
         historyItem.className = `history-item ${item.result}`;
 
@@ -864,12 +885,16 @@
         historyList.appendChild(historyItem);
       });
 
-      const statValueTotal = document.querySelector(".stat-value .total");
-      //const statValueTotal = document.querySelector(".stat-value .total");
-      //const statValueTotal = document.querySelector(".stat-value .total");
-      //const statValueTotal = document.querySelector(".stat-value .total");
+      const statValueTotal = document.querySelector(".total-games");
+      const totalWonElement = document.querySelector(".total-won");
+      const totalWagered = document.querySelector(".total-wagared");
+      const totlaWinRate = document.querySelector(".win-rate");
 
-      statValueTotal.innerText = historyData.length;
+      statValueTotal.innerText = totalGame;
+      totalWonElement.innerText = `KSH${totalWon}`
+      totalWagered.innerText = `KSH${wagered}`
+      totlaWinRate.innerText = `${winRate}`
+
     }
 
     // Clear filters button (optional - you can add this if needed)
