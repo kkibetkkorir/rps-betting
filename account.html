@@ -403,7 +403,7 @@
         <button class="submit-btn" id="update-profile">Update Profile</button>
       </div>
 
-      <div class="card">
+      <!--<div class="card">
         <h2 class="card-title">
           <i class="fas fa-chart-line"></i>
           <span>Game Statistics</span>
@@ -426,7 +426,7 @@
             <div class="stat-value total-won">$2,890</div>
           </div>
         </div>
-      </div>
+      </div>-->
 
       <div class="card">
         <h2 class="card-title">
@@ -833,29 +833,9 @@
         return date.toLocaleDateString();
       }
 
-      const totalGame = 0;
-      const wins = 0;
-      const wagered = 0;
-      const totalWon = 0;
-
-      let winRate;
 
       // Display history items (show most recent first)
       historyData.slice().reverse().forEach(item => {
-        totalGame += 1;
-        if(item.result === "win"){
-          wins += 1;
-          totalWon += item.amount;
-        } else if(item.result === "loss"){
-          wagered += item.amount;
-        }
-
-        if(historyData[item] === historyData.length -1){
-          winRate = ((win * 100) / totalGame).toFixed(2)
-        }
-
-
-
         const historyItem = document.createElement("div");
         historyItem.className = `history-item ${item.result}`;
 
@@ -884,16 +864,6 @@
         historyItem.appendChild(resultDiv);
         historyList.appendChild(historyItem);
       });
-
-      const statValueTotal = document.querySelector(".total-games");
-      const totalWonElement = document.querySelector(".total-won");
-      const totalWagered = document.querySelector(".total-wagared");
-      const totlaWinRate = document.querySelector(".win-rate");
-
-      statValueTotal.innerHTML = totalGame;
-      totalWonElement.innerHTML = `KSH${totalWon}`
-      totalWagered.innerHTML = `KSH${wagered}`
-      totlaWinRate.innerHTML = `${winRate}`
 
     }
 
