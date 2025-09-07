@@ -641,9 +641,9 @@
 
   <script src="firebase-config.js"></script>
   <script>
-
     document.addEventListener("DOMContentLoaded", function () {
-      const accountId = null;
+      let accountId = null;
+
       // Check authentication state
       auth.onAuthStateChanged((user) => {
         if (!user) {
@@ -659,20 +659,6 @@
       const screens = document.querySelectorAll('.screen');
       const historyList = document.getElementById("historyList");
 
-      // Game state
-      const gameState = {
-        choices: ["rock", "paper", "scissors"],
-        emojiMap: {
-          rock: "✊",
-          paper: "✋",
-          scissors: "✌️"
-        },
-        currentBet: 0,
-        isBetPlaced: false,
-        userBalance: 100,
-        gameHistory: []
-      };
-
       navTabs.forEach(tab => {
         tab.addEventListener('click', function() {
           const target = this.getAttribute('data-target');
@@ -686,6 +672,11 @@
             screen.classList.remove('active');
             if (screen.id === target) {
               screen.classList.add('active');
+
+              // If history tab is selected, refresh the history
+              if (target === 'history' && accountId) {
+                loadUserData(accountId);
+              }
             }
           });
         });
@@ -724,103 +715,29 @@
             if (doc.exists) {
               const userData = doc.data();
               document.getElementById('balance').textContent = `$${userData.balance.toFixed(2)}`;
-              document.getElementById('username').value = userData.username;
-              document.getElementById('email').value = userData.email;
+              document.getElementById('username').value = userData.username || '';
+              document.getElementById('email').value = userData.email || '';
               accountId = userId;
-              /*if(userData.phone) {
-                document.getElementById('phone').value = userData.phone;
-              }*/
 
-              // Game history mapping implementation
-              /*if(userData.gameHistory != null) {
-                const historyList = document.getElementById('historyList');
-                historyList.innerHTML = ''; // Clear existing placeholder items
-
-                // Emoji mapping
-                const emojiMap = {
-                  rock: "✊",
-                  paper: "✋",
-                  scissors: "✌️"
-                };
-
-                // Format date to be relative or absolute
-                function formatDate(timestamp) {
-                  const date = timestamp.toDate();
-                  const now = new Date();
-                  const diffInSeconds = Math.floor((now - date) / 1000);
-
-                  if (diffInSeconds < 60) {
-                    return "Just now";
-                  }
-
-                  const diffInMinutes = Math.floor(diffInSeconds / 60);
-                  if (diffInMinutes < 60) {
-                    return `${diffInMinutes} min ago`;
-                  }
-
-                  const diffInHours = Math.floor(diffInMinutes / 60);
-                  if (diffInHours < 24) {
-                    return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`;
-                  }
-
-                  const diffInDays = Math.floor(diffInHours / 24);
-                  if (diffInDays < 7) {
-                    return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
-                  }
-
-                  return date.toLocaleDateString();
-                }
-
-                // Create HTML for each game
-                userData.gameHistory.forEach(game => {
-                  const historyItem = document.createElement('div');
-                  historyItem.className = `history-item ${game.result}`;
-
-                  const choiceDiv = document.createElement('div');
-                  choiceDiv.innerHTML = `
-                    <div>
-                      <span>${emojiMap[game.playerChoice]} vs ${emojiMap[game.computerChoice]}</span>
-                    </div>
-                    <div style="font-size: 0.8rem; color: var(--text-light);">
-                      ${formatDate(game.timestamp)}
-                    </div>
-                  `;
-
-                  const resultDiv = document.createElement('div');
-                  let resultText = '';
-                  let resultColor = '';
-
-                  if (game.result === 'win') {
-                    resultText = `+ $${game.amount.toFixed(2)}`;
-                    resultColor = 'var(--success)';
-                  } else if (game.result === 'loss') {
-                    resultText = `- $${game.amount.toFixed(2)}`;
-                    resultColor = 'var(--secondary)';
-                  } else {
-                    resultText = `$0.00`;
-                    resultColor = 'var(--warning)';
-                  }
-
-                  resultDiv.innerHTML = `
-                    <div style="color: ${resultColor}; font-weight: 500;">
-                      ${resultText}
-                    </div>
-                  `;
-
-                  historyItem.appendChild(choiceDiv);
-                  historyItem.appendChild(resultDiv);
-                  historyList.appendChild(historyItem);
-                });
+              // Render game history if it exists
+              if (userData.gameHistory) {
+                renderHistory(userData);
               } else {
-                const historyList = document.getElementById('historyList');
-                historyList.innerHTML = `<div>NO HISTORY YET</div>`;
-              }*/
+                historyList.innerHTML = '<div class="history-item">No games played yet</div>';
+              }
+            } else {
+              console.log("User document does not exist");
+            }
+          }).catch((error) => {
+            console.error("Error loading user data:", error);
+          });
+      }
 
-              // Render game history
-      function renderHistory() {
+      // Render game history with actual data from Firestore
+      function renderHistory(userData) {
         historyList.innerHTML = "";
 
-        if (gameState.gameHistory.length === 0) {
+        if (!userData.gameHistory || userData.gameHistory.length === 0) {
           const emptyMessage = document.createElement("div");
           emptyMessage.className = "history-item";
           emptyMessage.textContent = "No games played yet";
@@ -828,83 +745,76 @@
           return;
         }
 
-        gameState.gameHistory.slice().reverse().forEach(item => {
+        // Emoji mapping
+        const emojiMap = {
+          rock: "✊",
+          paper: "✋",
+          scissors: "✌️"
+        };
+
+        // Format date function
+        function formatDate(timestamp) {
+          // Handle both Firestore Timestamp objects and Date objects
+          const date = timestamp && typeof timestamp.toDate === 'function'
+            ? timestamp.toDate()
+            : new Date(timestamp);
+
+          const now = new Date();
+          const diffInSeconds = Math.floor((now - date) / 1000);
+
+          if (diffInSeconds < 60) {
+            return "Just now";
+          }
+
+          const diffInMinutes = Math.floor(diffInSeconds / 60);
+          if (diffInMinutes < 60) {
+            return `${diffInMinutes} min ago`;
+          }
+
+          const diffInHours = Math.floor(diffInMinutes / 60);
+          if (diffInHours < 24) {
+            return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`;
+          }
+
+          const diffInDays = Math.floor(diffInHours / 24);
+          if (diffInDays < 7) {
+            return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
+          }
+
+          return date.toLocaleDateString();
+        }
+
+        // Display history items (show most recent first)
+        userData.gameHistory.slice().reverse().forEach(item => {
           const historyItem = document.createElement("div");
           historyItem.className = `history-item ${item.result}`;
 
-          const choiceElement = document.createElement("span");
-          choiceElement.textContent = `${gameState.emojiMap[item.playerChoice]} vs ${gameState.emojiMap[item.computerChoice]}`;
+          const choiceDiv = document.createElement("div");
+          choiceDiv.innerHTML = `
+            <div>${emojiMap[item.playerChoice]} vs ${emojiMap[item.computerChoice]}</div>
+            <div style="font-size: 0.8rem; color: var(--text-light);">${formatDate(item.timestamp)}</div>
+          `;
 
-          const resultElement = document.createElement("span");
+          const resultDiv = document.createElement("div");
           let resultText = "";
           if (item.result === "win") {
             resultText = `+$${item.amount.toFixed(2)}`;
+            resultDiv.style.color = "var(--success)";
           } else if (item.result === "loss") {
             resultText = `-$${item.amount.toFixed(2)}`;
+            resultDiv.style.color = "var(--secondary)";
           } else {
-            resultText = "Draw";
+            resultText = "Draw $0.00";
+            resultDiv.style.color = "var(--warning)";
           }
-          resultElement.textContent = resultText;
+          resultDiv.style.fontWeight = "500";
+          resultDiv.textContent = resultText;
 
-          historyItem.appendChild(choiceElement);
-          historyItem.appendChild(resultElement);
+          historyItem.appendChild(choiceDiv);
+          historyItem.appendChild(resultDiv);
           historyList.appendChild(historyItem);
         });
       }
-
-              renderHistory();
-            } else {
-              console.log("does not exist")
-            }
-          }).catch((error) => {
-            console.error("Error loading user data:", error);
-          });
-      }
-
-      /*function formatKenyanPhone(phone, format = '+254') {
-      // Remove spaces, hyphens, and non-digit characters except +
-      phone = phone.trim().replace(/[\s-]/g, '');
-
-      // Check if it starts with +254, 254, 07, or 7 and normalize
-      const regex = /^(?:\+254|254|0)?(7[0-9]{8})$/;
-      const match = phone.match(regex);
-
-      if (!match) return null; // Invalid number
-
-      const coreNumber = match[1]; // e.g. 712345678
-
-      // Return in preferred format
-      switch (format) {
-        case '+254':
-          return `+254${coreNumber}`;
-        case '07':
-          return `0${coreNumber}`;
-        case '254':
-          return `254${coreNumber}`;
-        case '7':
-          return coreNumber;
-        default:
-          return `+254${coreNumber}`;
-      }
-    }
-
-      //update user
-      // Save user data to Firestore
-      document.getElementById('update-profile').addEventListener('click', () => {
-        if(accountId !== null ){
-          const phone = formatKenyanPhone(document.getElementById('phone').value);
-          if(phone) {
-            db.collection('users').doc(accountId).update({
-              phone
-            })
-            .catch((error) => {
-              console.error("Error saving user data:", error);
-            });
-          } else {
-            alert("invalid phone")
-          }
-        }
-      })*/
     });
   </script>
 </body>
