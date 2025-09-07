@@ -1457,6 +1457,76 @@
       document.getElementById('gameType').value = 'all';
       applyFilters();
     }
+
+
+    // Payment method selection
+      const paymentMethods = document.querySelectorAll('.payment-method');
+
+      paymentMethods.forEach(method => {
+        method.addEventListener('click', function() {
+          const methodType = this.getAttribute('data-method');
+          const parentScreen = this.closest('.screen');
+
+          // Update active method
+          parentScreen.querySelectorAll('.payment-method').forEach(m => m.classList.remove('active'));
+          this.classList.add('active');
+
+          // Show corresponding form
+          parentScreen.querySelectorAll('.method-form').forEach(form => form.style.display = 'none');
+          parentScreen.querySelector(`#${parentScreen.id === 'deposit' ? '' : 'withdraw-'}${methodType}-form`).style.display = 'block';
+        });
+      });
+
+      // Format card number input
+      const cardNumberInput = document.getElementById('card-number');
+      if (cardNumberInput) {
+        cardNumberInput.addEventListener('input', function(e) {
+          let value = e.target.value.replace(/\D/g, '');
+
+          // Format the value with spaces every 4 characters
+          let formattedValue = '';
+          for (let i = 0; i < value.length; i++) {
+            if (i > 0 && i % 4 === 0) {
+              formattedValue += ' ';
+            }
+            formattedValue += value[i];
+          }
+
+          e.target.value = formattedValue;
+        });
+      }
+
+      // Format expiry date input
+      const expiryInput = document.getElementById('expiry-date');
+      if (expiryInput) {
+        expiryInput.addEventListener('input', function(e) {
+          let value = e.target.value.replace(/\D/g, '');
+
+          if (value.length > 2) {
+            value = value.substring(0, 2) + '/' + value.substring(2, 4);
+          }
+
+          e.target.value = value;
+        });
+      }
+
+      // Copy wallet address functionality
+      const copyButtons = document.querySelectorAll('.btn-outline');
+      copyButtons.forEach(button => {
+        if (button.textContent.includes('Copy')) {
+          button.addEventListener('click', function() {
+            const address = this.previousElementSibling.textContent.trim();
+            navigator.clipboard.writeText(address).then(() => {
+              const originalText = this.innerHTML;
+              this.innerHTML = '<i class="fas fa-check"></i> Copied!';
+
+              setTimeout(() => {
+                this.innerHTML = originalText;
+              }, 2000);
+            });
+          });
+        }
+      });
   });
 </script>
 </body>
