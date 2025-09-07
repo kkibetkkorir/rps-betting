@@ -640,182 +640,239 @@
   </footer>
 
   <script src="firebase-config.js"></script>
-  <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      let accountId = null;
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    let accountId = null;
+    let allGameHistory = [];
 
-      // Check authentication state
-      auth.onAuthStateChanged((user) => {
-        if (!user) {
-          window.location.href = 'get-started.html';
-        } else {
-          // Load user data
-          loadUserData(user.uid);
-        }
-      });
-
-      // Navigation functionality
-      const navTabs = document.querySelectorAll('.nav-tab');
-      const screens = document.querySelectorAll('.screen');
-      const historyList = document.getElementById("historyList");
-
-      navTabs.forEach(tab => {
-        tab.addEventListener('click', function() {
-          const target = this.getAttribute('data-target');
-
-          // Update active tab
-          navTabs.forEach(t => t.classList.remove('active'));
-          this.classList.add('active');
-
-          // Show target screen
-          screens.forEach(screen => {
-            screen.classList.remove('active');
-            if (screen.id === target) {
-              screen.classList.add('active');
-
-              // If history tab is selected, refresh the history
-              if (target === 'history' && accountId) {
-                loadUserData(accountId);
-              }
-            }
-          });
-        });
-      });
-
-      // Logout button
-      document.getElementById('logoutBtn').addEventListener('click', function() {
-        auth.signOut().then(() => {
-          window.location.href = 'get-started.html';
-        });
-      });
-
-      // Form submissions
-      const forms = document.querySelectorAll('form');
-      forms.forEach(form => {
-        form.addEventListener('submit', function(e) {
-          e.preventDefault();
-          alert('Action completed successfully!');
-        });
-      });
-
-      // Format currency inputs
-      const currencyInputs = document.querySelectorAll('input[type="number"]');
-      currencyInputs.forEach(input => {
-        input.addEventListener('blur', function() {
-          if (this.value) {
-            this.value = parseFloat(this.value).toFixed(2);
-          }
-        });
-      });
-
-      // Load user data from Firestore
-      function loadUserData(userId) {
-        db.collection('users').doc(userId).get()
-          .then((doc) => {
-            if (doc.exists) {
-              const userData = doc.data();
-              document.getElementById('balance').textContent = `$${userData.balance.toFixed(2)}`;
-              document.getElementById('username').value = userData.username || '';
-              document.getElementById('email').value = userData.email || '';
-              accountId = userId;
-
-              // Render game history if it exists
-              if (userData.gameHistory) {
-                renderHistory(userData);
-              } else {
-                historyList.innerHTML = '<div class="history-item">No games played yet</div>';
-              }
-            } else {
-              console.log("User document does not exist");
-            }
-          }).catch((error) => {
-            console.error("Error loading user data:", error);
-          });
-      }
-
-      // Render game history with actual data from Firestore
-      function renderHistory(userData) {
-        historyList.innerHTML = "";
-
-        if (!userData.gameHistory || userData.gameHistory.length === 0) {
-          const emptyMessage = document.createElement("div");
-          emptyMessage.className = "history-item";
-          emptyMessage.textContent = "No games played yet";
-          historyList.appendChild(emptyMessage);
-          return;
-        }
-
-        // Emoji mapping
-        const emojiMap = {
-          rock: "✊",
-          paper: "✋",
-          scissors: "✌️"
-        };
-
-        // Format date function
-        function formatDate(timestamp) {
-          // Handle both Firestore Timestamp objects and Date objects
-          const date = timestamp && typeof timestamp.toDate === 'function'
-            ? timestamp.toDate()
-            : new Date(timestamp);
-
-          const now = new Date();
-          const diffInSeconds = Math.floor((now - date) / 1000);
-
-          if (diffInSeconds < 60) {
-            return "Just now";
-          }
-
-          const diffInMinutes = Math.floor(diffInSeconds / 60);
-          if (diffInMinutes < 60) {
-            return `${diffInMinutes} min ago`;
-          }
-
-          const diffInHours = Math.floor(diffInMinutes / 60);
-          if (diffInHours < 24) {
-            return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`;
-          }
-
-          const diffInDays = Math.floor(diffInHours / 24);
-          if (diffInDays < 7) {
-            return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
-          }
-
-          return date.toLocaleDateString();
-        }
-
-        // Display history items (show most recent first)
-        userData.gameHistory.slice().reverse().forEach(item => {
-          const historyItem = document.createElement("div");
-          historyItem.className = `history-item ${item.result}`;
-
-          const choiceDiv = document.createElement("div");
-          choiceDiv.innerHTML = `
-            <div>${emojiMap[item.playerChoice]} vs ${emojiMap[item.computerChoice]}</div>
-            <div style="font-size: 0.8rem; color: var(--text-light);">${formatDate(item.timestamp)}</div>
-          `;
-
-          const resultDiv = document.createElement("div");
-          let resultText = "";
-          if (item.result === "win") {
-            resultText = `+$${item.amount.toFixed(2)}`;
-            resultDiv.style.color = "var(--success)";
-          } else if (item.result === "loss") {
-            resultText = `-$${item.amount.toFixed(2)}`;
-            resultDiv.style.color = "var(--secondary)";
-          } else {
-            resultText = "Draw $0.00";
-            resultDiv.style.color = "var(--warning)";
-          }
-          resultDiv.style.fontWeight = "500";
-          resultDiv.textContent = resultText;
-
-          historyItem.appendChild(choiceDiv);
-          historyItem.appendChild(resultDiv);
-          historyList.appendChild(historyItem);
-        });
+    // Check authentication state
+    auth.onAuthStateChanged((user) => {
+      if (!user) {
+        window.location.href = 'get-started.html';
+      } else {
+        // Load user data
+        loadUserData(user.uid);
       }
     });
-  </script>
+
+    // Navigation functionality
+    const navTabs = document.querySelectorAll('.nav-tab');
+    const screens = document.querySelectorAll('.screen');
+    const historyList = document.getElementById("historyList");
+
+    navTabs.forEach(tab => {
+      tab.addEventListener('click', function() {
+        const target = this.getAttribute('data-target');
+
+        // Update active tab
+        navTabs.forEach(t => t.classList.remove('active'));
+        this.classList.add('active');
+
+        // Show target screen
+        screens.forEach(screen => {
+          screen.classList.remove('active');
+          if (screen.id === target) {
+            screen.classList.add('active');
+
+            // If history tab is selected, refresh the history
+            if (target === 'history' && accountId) {
+              loadUserData(accountId);
+            }
+          }
+        });
+      });
+    });
+
+    // Logout button
+    document.getElementById('logoutBtn').addEventListener('click', function() {
+      auth.signOut().then(() => {
+        window.location.href = 'get-started.html';
+      });
+    });
+
+    // Form submissions
+    const forms = document.querySelectorAll('form');
+    forms.forEach(form => {
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        alert('Action completed successfully!');
+      });
+    });
+
+    // Format currency inputs
+    const currencyInputs = document.querySelectorAll('input[type="number"]');
+    currencyInputs.forEach(input => {
+      input.addEventListener('blur', function() {
+        if (this.value) {
+          this.value = parseFloat(this.value).toFixed(2);
+        }
+      });
+    });
+
+    // Apply filters button
+    document.querySelector('.submit-btn').addEventListener('click', function() {
+      applyFilters();
+    });
+
+    // Load user data from Firestore
+    function loadUserData(userId) {
+      db.collection('users').doc(userId).get()
+        .then((doc) => {
+          if (doc.exists) {
+            const userData = doc.data();
+            document.getElementById('balance').textContent = `$${userData.balance.toFixed(2)}`;
+            document.getElementById('username').value = userData.username || '';
+            document.getElementById('email').value = userData.email || '';
+            accountId = userId;
+
+            // Store all game history for filtering
+            if (userData.gameHistory) {
+              allGameHistory = userData.gameHistory;
+              applyFilters(); // Apply any existing filters
+            } else {
+              historyList.innerHTML = '<div class="history-item">No games played yet</div>';
+              allGameHistory = [];
+            }
+          } else {
+            console.log("User document does not exist");
+          }
+        }).catch((error) => {
+          console.error("Error loading user data:", error);
+        });
+    }
+
+    // Apply filters to game history
+    function applyFilters() {
+      if (allGameHistory.length === 0) {
+        historyList.innerHTML = '<div class="history-item">No games played yet</div>';
+        return;
+      }
+
+      const startDate = document.getElementById('startDate').value;
+      const endDate = document.getElementById('endDate').value;
+      const resultType = document.getElementById('gameType').value;
+
+      // Filter by date range
+      let filteredHistory = allGameHistory.filter(item => {
+        const itemDate = item.timestamp && typeof item.timestamp.toDate === 'function'
+          ? item.timestamp.toDate()
+          : new Date(item.timestamp);
+
+        if (startDate) {
+          const filterStartDate = new Date(startDate);
+          filterStartDate.setHours(0, 0, 0, 0);
+          if (itemDate < filterStartDate) return false;
+        }
+
+        if (endDate) {
+          const filterEndDate = new Date(endDate);
+          filterEndDate.setHours(23, 59, 59, 999);
+          if (itemDate > filterEndDate) return false;
+        }
+
+        return true;
+      });
+
+      // Filter by result type
+      if (resultType !== 'all') {
+        filteredHistory = filteredHistory.filter(item => item.result === resultType);
+      }
+
+      // Render filtered history
+      renderHistory(filteredHistory);
+    }
+
+    // Render game history
+    function renderHistory(historyData) {
+      historyList.innerHTML = "";
+
+      if (!historyData || historyData.length === 0) {
+        const emptyMessage = document.createElement("div");
+        emptyMessage.className = "history-item";
+        emptyMessage.textContent = "No matching games found";
+        historyList.appendChild(emptyMessage);
+        return;
+      }
+
+      // Emoji mapping
+      const emojiMap = {
+        rock: "✊",
+        paper: "✋",
+        scissors: "✌️"
+      };
+
+      // Format date function
+      function formatDate(timestamp) {
+        // Handle both Firestore Timestamp objects and Date objects
+        const date = timestamp && typeof timestamp.toDate === 'function'
+          ? timestamp.toDate()
+          : new Date(timestamp);
+
+        const now = new Date();
+        const diffInSeconds = Math.floor((now - date) / 1000);
+
+        if (diffInSeconds < 60) {
+          return "Just now";
+        }
+
+        const diffInMinutes = Math.floor(diffInSeconds / 60);
+        if (diffInMinutes < 60) {
+          return `${diffInMinutes} min ago`;
+        }
+
+        const diffInHours = Math.floor(diffInMinutes / 60);
+        if (diffInHours < 24) {
+          return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`;
+        }
+
+        const diffInDays = Math.floor(diffInHours / 24);
+        if (diffInDays < 7) {
+          return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
+        }
+
+        return date.toLocaleDateString();
+      }
+
+      // Display history items (show most recent first)
+      historyData.slice().reverse().forEach(item => {
+        const historyItem = document.createElement("div");
+        historyItem.className = `history-item ${item.result}`;
+
+        const choiceDiv = document.createElement("div");
+        choiceDiv.innerHTML = `
+          <div>${emojiMap[item.playerChoice]} vs ${emojiMap[item.computerChoice]}</div>
+          <div style="font-size: 0.8rem; color: var(--text-light);">${formatDate(item.timestamp)}</div>
+        `;
+
+        const resultDiv = document.createElement("div");
+        let resultText = "";
+        if (item.result === "win") {
+          resultText = `+$${item.amount.toFixed(2)}`;
+          resultDiv.style.color = "var(--success)";
+        } else if (item.result === "loss") {
+          resultText = `-$${item.amount.toFixed(2)}`;
+          resultDiv.style.color = "var(--secondary)";
+        } else {
+          resultText = "Draw $0.00";
+          resultDiv.style.color = "var(--warning)";
+        }
+        resultDiv.style.fontWeight = "500";
+        resultDiv.textContent = resultText;
+
+        historyItem.appendChild(choiceDiv);
+        historyItem.appendChild(resultDiv);
+        historyList.appendChild(historyItem);
+      });
+    }
+
+    // Clear filters button (optional - you can add this if needed)
+    function clearFilters() {
+      document.getElementById('startDate').value = '';
+      document.getElementById('endDate').value = '';
+      document.getElementById('gameType').value = 'all';
+      applyFilters();
+    }
+  });
+</script>
 </body>
 </html>
