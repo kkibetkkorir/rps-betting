@@ -657,6 +657,7 @@
       // Navigation functionality
       const navTabs = document.querySelectorAll('.nav-tab');
       const screens = document.querySelectorAll('.screen');
+      const historyList = document.getElementById("historyList");
 
       navTabs.forEach(tab => {
         tab.addEventListener('click', function() {
@@ -709,7 +710,7 @@
             if (doc.exists) {
               const userData = doc.data();
               document.getElementById('balance').textContent = `$${userData.balance.toFixed(2)}`;
-              document.getElementById('username').value = userData.usernname;
+              document.getElementById('username').value = userData.username;
               document.getElementById('email').value = userData.email;
               accountId = userId;
               /*if(userData.phone) {
@@ -717,7 +718,7 @@
               }*/
 
               // Game history mapping implementation
-              if(userData.gameHistory != null) {
+              /*if(userData.gameHistory != null) {
                 const historyList = document.getElementById('historyList');
                 historyList.innerHTML = ''; // Clear existing placeholder items
 
@@ -799,9 +800,45 @@
               } else {
                 const historyList = document.getElementById('historyList');
                 historyList.innerHTML = `<div>NO HISTORY YET</div>`;
-              }
+              }*/
 
-              console.log(userData);
+              // Render game history
+      function renderHistory() {
+        historyList.innerHTML = "";
+
+        if (gameState.gameHistory.length === 0) {
+          const emptyMessage = document.createElement("div");
+          emptyMessage.className = "history-item";
+          emptyMessage.textContent = "No games played yet";
+          historyList.appendChild(emptyMessage);
+          return;
+        }
+
+        gameState.gameHistory.slice().reverse().forEach(item => {
+          const historyItem = document.createElement("div");
+          historyItem.className = `history-item ${item.result}`;
+
+          const choiceElement = document.createElement("span");
+          choiceElement.textContent = `${gameState.emojiMap[item.playerChoice]} vs ${gameState.emojiMap[item.computerChoice]}`;
+
+          const resultElement = document.createElement("span");
+          let resultText = "";
+          if (item.result === "win") {
+            resultText = `+$${item.amount.toFixed(2)}`;
+          } else if (item.result === "loss") {
+            resultText = `-$${item.amount.toFixed(2)}`;
+          } else {
+            resultText = "Draw";
+          }
+          resultElement.textContent = resultText;
+
+          historyItem.appendChild(choiceElement);
+          historyItem.appendChild(resultElement);
+          historyList.appendChild(historyItem);
+        });
+      }
+
+              renderHistory();
             } else {
               console.log("does not exist")
             }
