@@ -655,6 +655,7 @@
       // Navigation functionality
       const navTabs = document.querySelectorAll('.nav-tab');
       const screens = document.querySelectorAll('.screen');
+      const historyList = document.querySelector('.history-list');
 
       navTabs.forEach(tab => {
         tab.addEventListener('click', function() {
@@ -709,9 +710,94 @@
               document.getElementById('balance').textContent = `$${userData.balance.toFixed(2)}`;
               document.getElementById('username').value = userData.username;
               document.getElementById('email').value = userData.email;
+
+              // Game history mapping implementation
+              if(userData.gameHistory != null) {
+                const historyList = document.querySelector('.history-list');
+                historyList.innerHTML = ''; // Clear existing placeholder items
+
+                // Emoji mapping
+                const emojiMap = {
+                  rock: "✊",
+                  paper: "✋",
+                  scissors: "✌️"
+                };
+
+                // Format date to be relative or absolute
+                function formatDate(timestamp) {
+                  const date = timestamp.toDate();
+                  const now = new Date();
+                  const diffInSeconds = Math.floor((now - date) / 1000);
+
+                  if (diffInSeconds < 60) {
+                    return "Just now";
+                  }
+
+                  const diffInMinutes = Math.floor(diffInSeconds / 60);
+                  if (diffInMinutes < 60) {
+                    return `${diffInMinutes} min ago`;
+                  }
+
+                  const diffInHours = Math.floor(diffInMinutes / 60);
+                  if (diffInHours < 24) {
+                    return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`;
+                  }
+
+                  const diffInDays = Math.floor(diffInHours / 24);
+                  if (diffInDays < 7) {
+                    return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
+                  }
+
+                  return date.toLocaleDateString();
+                }
+
+                // Create HTML for each game
+                userData.gameHistory.forEach(game => {
+                  const historyItem = document.createElement('div');
+                  historyItem.className = `history-item ${game.result}`;
+
+                  const choiceDiv = document.createElement('div');
+                  choiceDiv.innerHTML = `
+                    <div>
+                      <span>${emojiMap[game.playerChoice]} vs ${emojiMap[game.computerChoice]}</span>
+                    </div>
+                    <div style="font-size: 0.8rem; color: var(--text-light);">
+                      ${formatDate(game.timestamp)}
+                    </div>
+                  `;
+
+                  const resultDiv = document.createElement('div');
+                  let resultText = '';
+                  let resultColor = '';
+
+                  if (game.result === 'win') {
+                    resultText = `+ $${game.amount.toFixed(2)}`;
+                    resultColor = 'var(--success)';
+                  } else if (game.result === 'loss') {
+                    resultText = `- $${game.amount.toFixed(2)}`;
+                    resultColor = 'var(--secondary)';
+                  } else {
+                    resultText = `$0.00`;
+                    resultColor = 'var(--warning)';
+                  }
+
+                  resultDiv.innerHTML = `
+                    <div style="color: ${resultColor}; font-weight: 500;">
+                      ${resultText}
+                    </div>
+                  `;
+
+                  historyItem.appendChild(choiceDiv);
+                  historyItem.appendChild(resultDiv);
+                  historyList.appendChild(historyItem);
+                });
+              }
+
+              console.log(userData);
+            } else {
+              console.log("does not exist")
             }
-          })
-          .catch((error) => {
+          }).catch((error) => {
             console.error("Error loading user data:", error);
           });
       }

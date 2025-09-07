@@ -318,9 +318,13 @@
         <span>Or continue with</span>
       </div>
 
-      <button class="google-auth-btn" id="google-login">
+      <!--<button class="google-auth-btn" id="google-login">
         <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google logo" width="20" height="20">
         Sign in with Google
+      </button>-->
+
+      <button type="button" class="btn btn-google google-auth-btn" id="google-login">
+        <i class="fab fa-google"></i> Sign up with Google
       </button>
 
       <div class="auth-footer">
@@ -362,9 +366,13 @@
         <span>Or sign up with</span>
       </div>
 
-      <button class="google-auth-btn" id="google-register">
+      <!--<button class="google-auth-btn" id="google-register">
         <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google logo" width="20" height="20">
         Sign up with Google
+      </button>-->
+
+      <button type="button" class="btn btn-google google-auth-btn" id="google-register">
+        <i class="fab fa-google"></i> Sign up with Google
       </button>
 
       <div class="auth-footer">
@@ -376,7 +384,10 @@
       </div>
     </div>
   </div>
-
+  <!-- Firebase App and Auth SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
   <script src="firebase-config.js"></script>
   <script>
     document.addEventListener("DOMContentLoaded", function () {
@@ -568,11 +579,44 @@
       });
 
       // Check if user is already logged in
-      auth.onAuthStateChanged((user) => {
+      /*auth.onAuthStateChanged((user) => {
         if (user) {
           window.location.href = 'index.html';
         }
-      });
+      });*/
+
+
+      // Track if we're in the middle of a registration process
+            let isRegistering = false;
+
+            // Modified auth state change handler
+            auth.onAuthStateChanged((user) => {
+                // Only redirect if we're not in the middle of registration
+                if (user && !isRegistering) {
+                    // Check if user document exists before redirecting
+                    db.collection('users').doc(user.uid).get()
+                        .then((doc) => {
+                            if (doc.exists) {
+                                window.location.href = 'index.html';
+                            } else {
+                                // If document doesn't exist, create it
+                                isRegistering = true;
+                                return db.collection('users').doc(user.uid).set({
+                                    username: user.displayName || user.email.split('@')[0],
+                                    email: user.email,
+                                    balance: 100.00,
+                                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                                }).then(() => {
+                                    isRegistering = false;
+                                    window.location.href = 'index.html';
+                                });
+                            }
+                        })
+                        .catch((error) => {
+                            console.error("Error checking user document: ", error);
+                        });
+                }
+            });
     });
   </script>
 </body>

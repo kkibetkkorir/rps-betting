@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firestore Debugger - RPS Betting</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <style>
+        :root {
+            --primary: #4a6fa5;
+            --primary-light: #6b8cbe;
+            --secondary: #ff6b6b;
+            --success: #4caf50;
+            --warning: #ff9800;
+            --dark: #2d3436;
+            --light: #f5f5f5;
+            --gray: #dfe6e9;
+            --card-bg: #ffffff;
+            --text: #2d3436;
+            --text-light: #636e72;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --radius: 12px;
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            width: 100%;
+            padding: 20px;
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 600;
+            font-size: 1.4rem;
+            color: var(--primary);
+        }
+
+        .logo i {
+            font-size: 1.8rem;
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            width: 100%;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 25px;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--gray);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: var(--text);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--gray);
+            border-radius: var(--radius);
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(74, 111, 165, 0.2);
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: var(--radius);
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-light);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-warning {
+            background: var(--warning);
+            color: white;
+        }
+
+        .debug-output {
+            background: var(--dark);
+            color: white;
+            padding: 15px;
+            border-radius: var(--radius);
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-connected {
+            background: var(--success);
+        }
+
+        .status-disconnected {
+            background: var(--secondary);
+        }
+
+        .log-entry {
+            padding: 8px 12px;
+            border-radius: var(--radius);
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+        }
+
+        .log-success {
+            background: rgba(76, 175, 80, 0.15);
+            border-left: 4px solid var(--success);
+        }
+
+        .log-error {
+            background: rgba(255, 107, 107, 0.15);
+            border-left: 4px solid var(--secondary);
+        }
+
+        .log-info {
+            background: rgba(74, 111, 165, 0.15);
+            border-left: 4px solid var(--primary);
+        }
+
+        .log-warning {
+            background: rgba(255, 152, 0, 0.15);
+            border-left: 4px solid var(--warning);
+        }
+
+        .firebase-config {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        @media (max-width: 600px) {
+            .firebase-config {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-bug"></i>
+                <span>Firestore Debugger - RPS Betting</span>
+            </div>
+            <div id="connectionStatus">
+                <span class="status-indicator status-disconnected"></span>
+                Disconnected
+            </div>
+        </header>
+
+        <div class="content">
+            <div class="card">
+                <h2 class="card-title">
+                    <i class="fas fa-cog"></i>
+                    Firebase Configuration
+                </h2>
+                <div class="form-group">
+                    <label for="apiKey">API Key</label>
+                    <input type="text" id="apiKey" class="form-control" placeholder="Your Firebase API Key">
+                </div>
+                <div class="form-group">
+                    <label for="authDomain">Auth Domain</label>
+                    <input type="text" id="authDomain" class="form-control" placeholder="your-project.firebaseapp.com">
+                </div>
+                <div class="form-group">
+                    <label for="projectId">Project ID</label>
+                    <input type="text" id="projectId" class="form-control" placeholder="your-project-id">
+                </div>
+                <div class="form-group">
+                    <label for="storageBucket">Storage Bucket</label>
+                    <input type="text" id="storageBucket" class="form-control" placeholder="your-project.appspot.com">
+                </div>
+                <div class="form-group">
+                    <label for="messagingSenderId">Messaging Sender ID</label>
+                    <input type="text" id="messagingSenderId" class="form-control" placeholder="123456789">
+                </div>
+                <div class="form-group">
+                    <label for="appId">App ID</label>
+                    <input type="text" id="appId" class="form-control" placeholder="1:123456789:web:abc123">
+                </div>
+                <button id="initFirebase" class="btn btn-primary">
+                    <i class="fas fa-play"></i>
+                    Initialize Firebase
+                </button>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title">
+                    <i class="fas fa-user"></i>
+                    Test Authentication
+                </h2>
+                <div class="form-group">
+                    <label for="testEmail">Test Email</label>
+                    <input type="email" id="testEmail" class="form-control" placeholder="test@example.com" value="test@example.com">
+                </div>
+                <div class="form-group">
+                    <label for="testPassword">Test Password</label>
+                    <input type="password" id="testPassword" class="form-control" placeholder="Password" value="password123">
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button id="testSignUp" class="btn btn-primary">
+                        <i class="fas fa-user-plus"></i>
+                        Test Sign Up
+                    </button>
+                    <button id="testSignIn" class="btn btn-success">
+                        <i class="fas fa-sign-in-alt"></i>
+                        Test Sign In
+                    </button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title">
+                    <i class="fas fa-database"></i>
+                    Test Firestore Operations
+                </h2>
+                <div class="form-group">
+                    <label for="collectionName">Collection Name</label>
+                    <input type="text" id="collectionName" class="form-control" value="users" placeholder="Collection name">
+                </div>
+                <div class="form-group">
+                    <label for="documentData">Document Data (JSON)</label>
+                    <textarea id="documentData" class="form-control" rows="4" placeholder='{"name": "Test User", "balance": 100}'>{"name": "Test User", "balance": 100, "email": "test@example.com", "createdAt": "2023-10-15"}</textarea>
+                </div>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button id="testSetDocument" class="btn btn-primary">
+                        <i class="fas fa-save"></i>
+                        Set Document
+                    </button>
+                    <button id="testGetDocument" class="btn btn-success">
+                        <i class="fas fa-download"></i>
+                        Get Document
+                    </button>
+                    <button id="testUpdateDocument" class="btn btn-warning">
+                        <i class="fas fa-edit"></i>
+                        Update Document
+                    </button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title">
+                    <i class="fas fa-info-circle"></i>
+                    Debug Information
+                </h2>
+                <div id="debugLogs">
+                    <div class="log-entry log-info">
+                        <i class="fas fa-info-circle"></i>
+                        Welcome to the Firestore Debugger. Initialize Firebase to begin.
+                    </div>
+                </div>
+                <button id="clearLogs" class="btn" style="margin-top: 15px;">
+                    <i class="fas fa-broom"></i>
+                    Clear Logs
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Firebase app instance
+            let firebaseApp = null;
+            let auth = null;
+            let db = null;
+            let currentUser = null;
+
+            // DOM elements
+            const connectionStatus = document.getElementById('connectionStatus');
+            const debugLogs = document.getElementById('debugLogs');
+            const initFirebaseBtn = document.getElementById('initFirebase');
+            const testSignUpBtn = document.getElementById('testSignUp');
+            const testSignInBtn = document.getElementById('testSignIn');
+            const testSetDocumentBtn = document.getElementById('testSetDocument');
+            const testGetDocumentBtn = document.getElementById('testGetDocument');
+            const testUpdateDocumentBtn = document.getElementById('testUpdateDocument');
+            const clearLogsBtn = document.getElementById('clearLogs');
+
+            // Add log entry
+            function addLog(message, type = 'info') {
+                const logEntry = document.createElement('div');
+                logEntry.className = `log-entry log-${type}`;
+
+                let icon = 'info-circle';
+                if (type === 'success') icon = 'check-circle';
+                if (type === 'error') icon = 'exclamation-circle';
+                if (type === 'warning') icon = 'exclamation-triangle';
+
+                logEntry.innerHTML = `<i class="fas fa-${icon}"></i> ${message}`;
+                debugLogs.appendChild(logEntry);
+                debugLogs.scrollTop = debugLogs.scrollHeight;
+            }
+
+            // Update connection status
+            function updateConnectionStatus(connected) {
+                const indicator = connectionStatus.querySelector('.status-indicator');
+                if (connected) {
+                    indicator.className = 'status-indicator status-connected';
+                    connectionStatus.innerHTML = '<span class="status-indicator status-connected"></span> Connected to Firebase';
+                } else {
+                    indicator.className = 'status-indicator status-disconnected';
+                    connectionStatus.innerHTML = '<span class="status-indicator status-disconnected"></span> Disconnected';
+                }
+            }
+
+            // Initialize Firebase
+            initFirebaseBtn.addEventListener('click', function() {
+                const config = {
+                    apiKey: document.getElementById('apiKey').value,
+                    authDomain: document.getElementById('authDomain').value,
+                    projectId: document.getElementById('projectId').value,
+                    storageBucket: document.getElementById('storageBucket').value,
+                    messagingSenderId: document.getElementById('messagingSenderId').value,
+                    appId: document.getElementById('appId').value
+                };
+
+                // Validate config
+                if (Object.values(config).some(value => !value)) {
+                    addLog('Please fill in all Firebase configuration fields', 'error');
+                    return;
+                }
+
+                try {
+                    // Initialize Firebase
+                    firebaseApp = firebase.initializeApp(config);
+                    auth = firebase.auth();
+                    db = firebase.firestore();
+
+                    // Set up auth state listener
+                    auth.onAuthStateChanged((user) => {
+                        if (user) {
+                            currentUser = user;
+                            addLog(`User authenticated: ${user.email} (${user.uid})`, 'success');
+                        } else {
+                            currentUser = null;
+                            addLog('User signed out', 'info');
+                        }
+                    });
+
+                    // Check Firestore connection
+                    db.collection('test').doc('connection').get()
+                        .then(() => {
+                            updateConnectionStatus(true);
+                            addLog('Firestore connection successful', 'success');
+                        })
+                        .catch((error) => {
+                            updateConnectionStatus(false);
+                            addLog(`Firestore connection failed: ${error.message}`, 'error');
+                        });
+
+                    addLog('Firebase initialized successfully', 'success');
+                } catch (error) {
+                    addLog(`Firebase initialization error: ${error.message}`, 'error');
+                }
+            });
+
+            // Test sign up
+            testSignUpBtn.addEventListener('click', function() {
+                if (!auth) {
+                    addLog('Please initialize Firebase first', 'error');
+                    return;
+                }
+
+                const email = document.getElementById('testEmail').value;
+                const password = document.getElementById('testPassword').value;
+
+                auth.createUserWithEmailAndPassword(email, password)
+                    .then((userCredential) => {
+                        addLog(`User created successfully: ${userCredential.user.email}`, 'success');
+                    })
+                    .catch((error) => {
+                        addLog(`Sign up error: ${error.message}`, 'error');
+                    });
+            });
+
+            // Test sign in
+            testSignInBtn.addEventListener('click', function() {
+                if (!auth) {
+                    addLog('Please initialize Firebase first', 'error');
+                    return;
+                }
+
+                const email = document.getElementById('testEmail').value;
+                const password = document.getElementById('testPassword').value;
+
+                auth.signInWithEmailAndPassword(email, password)
+                    .then((userCredential) => {
+                        addLog(`Signed in successfully: ${userCredential.user.email}`, 'success');
+                    })
+                    .catch((error) => {
+                        addLog(`Sign in error: ${error.message}`, 'error');
+                    });
+            });
+
+            // Test set document
+            testSetDocumentBtn.addEventListener('click', function() {
+                if (!db || !currentUser) {
+                    addLog('Please initialize Firebase and sign in first', 'error');
+                    return;
+                }
+
+                const collectionName = document.getElementById('collectionName').value;
+                const documentData = document.getElementById('documentData').value;
+
+                let data;
+                try {
+                    data = JSON.parse(documentData);
+                } catch (error) {
+                    addLog('Invalid JSON data', 'error');
+                    return;
+                }
+
+                // Add user ID and timestamp to data
+                data.userId = currentUser.uid;
+                data.lastUpdated = new Date();
+
+                db.collection(collectionName).doc(currentUser.uid).set(data)
+                    .then(() => {
+                        addLog(`Document written to ${collectionName}/${currentUser.uid}`, 'success');
+                    })
+                    .catch((error) => {
+                        addLog(`Error writing document: ${error.message}`, 'error');
+                    });
+            });
+
+            // Test get document
+            testGetDocumentBtn.addEventListener('click', function() {
+                if (!db || !currentUser) {
+                    addLog('Please initialize Firebase and sign in first', 'error');
+                    return;
+                }
+
+                const collectionName = document.getElementById('collectionName').value;
+
+                db.collection(collectionName).doc(currentUser.uid).get()
+                    .then((doc) => {
+                        if (doc.exists) {
+                            addLog(`Document data: ${JSON.stringify(doc.data(), null, 2)}`, 'success');
+                        } else {
+                            addLog('No such document!', 'warning');
+                        }
+                    })
+                    .catch((error) => {
+                        addLog(`Error getting document: ${error.message}`, 'error');
+                    });
+            });
+
+            // Test update document
+            testUpdateDocumentBtn.addEventListener('click', function() {
+                if (!db || !currentUser) {
+                    addLog('Please initialize Firebase and sign in first', 'error');
+                    return;
+                }
+
+                const collectionName = document.getElementById('collectionName').value;
+                const documentData = document.getElementById('documentData').value;
+
+                let data;
+                try {
+                    data = JSON.parse(documentData);
+                } catch (error) {
+                    addLog('Invalid JSON data', 'error');
+                    return;
+                }
+
+                // Add update timestamp
+                data.lastUpdated = new Date();
+
+                db.collection(collectionName).doc(currentUser.uid).update(data)
+                    .then(() => {
+                        addLog(`Document updated in ${collectionName}/${currentUser.uid}`, 'success');
+                    })
+                    .catch((error) => {
+                        addLog(`Error updating document: ${error.message}`, 'error');
+                    // Try set with merge as fallback
+                        db.collection(collectionName).doc(currentUser.uid).set(data, { merge: true })
+                        .then(() => {
+                            addLog(`Document set with merge instead`, 'success');
+                        })
+                        .catch((error2) => {
+                            addLog(`Error with set merge: ${error2.message}`, 'error');
+                        });
+                    });
+            });
+
+            // Clear logs
+            clearLogsBtn.addEventListener('click', function() {
+                debugLogs.innerHTML = '';
+                addLog('Logs cleared', 'info');
+            });
+
+            // Add initial log
+            addLog('Firestore Debugger initialized. Please configure Firebase.');
+        });
+    </script>
+
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</body>
+</html>
