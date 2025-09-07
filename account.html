@@ -659,6 +659,20 @@
       const screens = document.querySelectorAll('.screen');
       const historyList = document.getElementById("historyList");
 
+      // Game state
+      const gameState = {
+        choices: ["rock", "paper", "scissors"],
+        emojiMap: {
+          rock: "✊",
+          paper: "✋",
+          scissors: "✌️"
+        },
+        currentBet: 0,
+        isBetPlaced: false,
+        userBalance: 100,
+        gameHistory: []
+      };
+
       navTabs.forEach(tab => {
         tab.addEventListener('click', function() {
           const target = this.getAttribute('data-target');
