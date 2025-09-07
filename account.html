@@ -337,6 +337,319 @@
         font-size: 1.5rem;
       }
     }
+
+
+
+    :root {
+      --primary: #4a6fa5;
+      --primary-light: #6b8cbe;
+      --secondary: #ff6b6b;
+      --success: #4caf50;
+      --warning: #ff9800;
+      --dark: #2d3436;
+      --light: #f5f5f5;
+      --gray: #dfe6e9;
+      --card-bg: #ffffff;
+      --text: #2d3436;
+      --text-light: #636e72;
+      --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      --radius: 12px;
+      --transition: all 0.3s ease;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      width: 100%;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 600;
+      font-size: 1.4rem;
+      color: var(--primary);
+    }
+
+    .logo i {
+      font-size: 1.8rem;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .balance {
+      background: var(--primary);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-weight: 500;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: var(--radius);
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      font-size: 0.9rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-light);
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--primary);
+      color: var(--primary);
+    }
+
+    .btn-outline:hover {
+      background: var(--primary);
+      color: white;
+    }
+
+    .nav-tabs {
+      display: flex;
+      gap: 5px;
+      background: white;
+      padding: 5px;
+      border-radius: var(--radius);
+      margin-bottom: 25px;
+      box-shadow: var(--shadow);
+    }
+
+    .nav-tab {
+      padding: 12px 20px;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: var(--transition);
+      font-weight: 500;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .nav-tab.active {
+      background: var(--primary);
+      color: white;
+    }
+
+    .nav-tab:hover:not(.active) {
+      background: var(--light);
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 25px;
+      box-shadow: var(--shadow);
+      transition: var(--transition);
+      margin-bottom: 20px;
+    }
+
+    .card:hover {
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+    }
+
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--primary);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      font-size: 0.9rem;
+      color: var(--text);
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 12px 15px;
+      border: 1px solid var(--gray);
+      border-radius: var(--radius);
+      font-size: 1rem;
+      transition: var(--transition);
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(74, 111, 165, 0.2);
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 14px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: var(--radius);
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      font-size: 1rem;
+      margin-top: 10px;
+    }
+
+    .submit-btn:hover {
+      background: var(--primary-light);
+    }
+
+    .payment-methods {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 12px;
+      margin: 20px 0;
+    }
+
+    .payment-method {
+      border: 1px solid var(--gray);
+      border-radius: var(--radius);
+      padding: 15px;
+      text-align: center;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .payment-method:hover {
+      border-color: var(--primary);
+      transform: translateY(-3px);
+    }
+
+    .payment-method.active {
+      border-color: var(--primary);
+      background: rgba(74, 111, 165, 0.1);
+    }
+
+    .payment-method i {
+      font-size: 1.8rem;
+      margin-bottom: 8px;
+      color: var(--primary);
+    }
+
+    .payment-method span {
+      font-size: 0.8rem;
+      display: block;
+    }
+
+    .transaction-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .transaction-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 15px;
+      border-radius: var(--radius);
+      background: var(--light);
+      font-size: 0.9rem;
+    }
+
+    .transaction-item.deposit {
+      border-left: 4px solid var(--success);
+    }
+
+    .transaction-item.withdrawal {
+      border-left: 4px solid var(--secondary);
+    }
+
+    .screen {
+      display: none;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    footer {
+      margin-top: 40px;
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--text-light);
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      header {
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      .payment-methods {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    @media (max-width: 480px) {
+      .nav-tab {
+        padding: 10px 15px;
+        font-size: 0.8rem;
+      }
+
+      .payment-methods {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
   </style>
 </head>
 <body>
@@ -450,7 +763,7 @@
     </div>
 
     <!-- Deposit Screen -->
-    <div class="screen" id="deposit">
+    <!--<div class="screen" id="deposit">
       <div class="card">
         <h2 class="card-title">
           <i class="fas fa-plus-circle"></i>
@@ -516,10 +829,10 @@
           </div>
         </div>
       </div>
-    </div>
+    </div>-->
 
     <!-- Withdraw Screen -->
-    <div class="screen" id="withdraw">
+    <!--<div class="screen" id="withdraw">
       <div class="card">
         <h2 class="card-title">
           <i class="fas fa-minus-circle"></i>
@@ -557,6 +870,276 @@
         <p style="margin-bottom: 15px; font-size: 0.9rem;">Withdrawals are processed within 24-48 hours. Minimum withdrawal amount is $20.</p>
         <p style="margin-bottom: 15px; font-size: 0.9rem;">Bank transfers may take 3-5 business days to reflect in your account.</p>
         <p style="font-size: 0.9rem;">For any issues, contact our support team at support@rpsbetting.com</p>
+      </div>
+    </div>-->
+
+    <!-- Deposit Screen -->
+    <div class="screen active" id="deposit">
+      <div class="card">
+        <h2 class="card-title">
+          <i class="fas fa-plus-circle"></i>
+          <span>Deposit Funds</span>
+        </h2>
+
+        <div class="payment-methods">
+          <div class="payment-method active" data-method="card">
+            <i class="fas fa-credit-card"></i>
+            <span>Credit Card</span>
+          </div>
+          <div class="payment-method" data-method="bank">
+            <i class="fas fa-university"></i>
+            <span>Bank Transfer</span>
+          </div>
+          <div class="payment-method" data-method="crypto">
+            <i class="fab fa-bitcoin"></i>
+            <span>Crypto</span>
+          </div>
+          <div class="payment-method" data-method="mpesa">
+            <i class="fas fa-mobile-alt"></i>
+            <span>M-Pesa</span>
+          </div>
+          <div class="payment-method" data-method="paypal">
+            <i class="fab fa-paypal"></i>
+            <span>PayPal</span>
+          </div>
+          <div class="payment-method" data-method="skrill">
+            <i class="fas fa-wallet"></i>
+            <span>Skrill</span>
+          </div>
+        </div>
+
+        <!-- Credit Card Form -->
+        <div id="card-form" class="method-form">
+          <div class="form-group">
+            <label for="card-number">Card Number</label>
+            <input type="text" id="card-number" class="form-control" placeholder="1234 5678 9012 3456">
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div class="form-group">
+              <label for="expiry-date">Expiry Date</label>
+              <input type="text" id="expiry-date" class="form-control" placeholder="MM/YY">
+            </div>
+            <div class="form-group">
+              <label for="cvv">CVV</label>
+              <input type="text" id="cvv" class="form-control" placeholder="123">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="cardholder">Cardholder Name</label>
+            <input type="text" id="cardholder" class="form-control" placeholder="John Doe">
+          </div>
+          <div class="form-group">
+            <label for="deposit-amount">Amount (USD)</label>
+            <input type="number" id="deposit-amount" class="form-control" placeholder="100.00" min="10">
+          </div>
+          <button class="submit-btn">Deposit Funds</button>
+        </div>
+
+        <!-- Bank Transfer Form -->
+        <div id="bank-form" class="method-form" style="display: none;">
+          <div class="form-group">
+            <label for="bank-name">Bank Name</label>
+            <input type="text" id="bank-name" class="form-control" placeholder="Enter bank name">
+          </div>
+          <div class="form-group">
+            <label for="account-number">Account Number</label>
+            <input type="text" id="account-number" class="form-control" placeholder="Enter account number">
+          </div>
+          <div class="form-group">
+            <label for="routing-number">Routing Number</label>
+            <input type="text" id="routing-number" class="form-control" placeholder="Enter routing number">
+          </div>
+          <div class="form-group">
+            <label for="bank-amount">Amount (USD)</label>
+            <input type="number" id="bank-amount" class="form-control" placeholder="100.00" min="50">
+          </div>
+          <button class="submit-btn">Initiate Transfer</button>
+        </div>
+
+        <!-- Crypto Form -->
+        <div id="crypto-form" class="method-form" style="display: none;">
+          <div class="form-group">
+            <label for="crypto-type">Select Cryptocurrency</label>
+            <select id="crypto-type" class="form-control">
+              <option value="btc">Bitcoin (BTC)</option>
+              <option value="eth">Ethereum (ETH)</option>
+              <option value="usdt">Tether (USDT)</option>
+              <option value="usdc">USD Coin (USDC)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="crypto-amount">Amount (USD)</label>
+            <input type="number" id="crypto-amount" class="form-control" placeholder="100.00" min="20">
+          </div>
+          <div class="form-group">
+            <label>Wallet Address</label>
+            <div style="background: var(--light); padding: 15px; border-radius: var(--radius); font-family: monospace; word-break: break-all;">
+              1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa
+            </div>
+            <button type="button" class="btn btn-outline" style="margin-top: 10px; width: 100%;">
+              <i class="fas fa-copy"></i> Copy Address
+            </button>
+          </div>
+          <button class="submit-btn">Generate Deposit Request</button>
+        </div>
+
+        <!-- M-Pesa Form -->
+        <div id="mpesa-form" class="method-form" style="display: none;">
+          <div class="form-group">
+            <label for="phone-number">Phone Number</label>
+            <input type="tel" id="phone-number" class="form-control" placeholder="254 712 345 678">
+          </div>
+          <div class="form-group">
+            <label for="mpesa-amount">Amount (USD)</label>
+            <input type="number" id="mpesa-amount" class="form-control" placeholder="100.00" min="5">
+          </div>
+          <div style="background: var(--light); padding: 15px; border-radius: var(--radius); margin-bottom: 20px;">
+            <p style="font-size: 0.9rem; margin-bottom: 10px;">You will receive a prompt on your phone to confirm the payment.</p>
+            <p style="font-size: 0.9rem;">Ensure your phone is nearby and has sufficient funds.</p>
+          </div>
+          <button class="submit-btn">Request Payment</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">
+          <i class="fas fa-clock"></i>
+          <span>Recent Deposits</span>
+        </h2>
+        <div class="transaction-list">
+          <div class="transaction-item deposit">
+            <div>
+              <div>Credit Card Deposit</div>
+              <div style="font-size: 0.8rem; color: var(--text-light);">Today, 14:32</div>
+            </div>
+            <div style="color: var(--success); font-weight: 500;">+ $100.00</div>
+          </div>
+          <div class="transaction-item deposit">
+            <div>
+              <div>PayPal Deposit</div>
+              <div style="font-size: 0.8rem; color: var(--text-light);">Yesterday, 09:15</div>
+            </div>
+            <div style="color: var(--success); font-weight: 500;">+ $250.00</div>
+          </div>
+          <div class="transaction-item deposit">
+            <div>
+              <div>Bank Transfer</div>
+              <div style="font-size: 0.8rem; color: var(--text-light);">Oct 12, 2025</div>
+            </div>
+            <div style="color: var(--success); font-weight: 500;">+ $500.00</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Withdraw Screen -->
+    <div class="screen" id="withdraw">
+      <div class="card">
+        <h2 class="card-title">
+          <i class="fas fa-minus-circle"></i>
+          <span>Withdraw Funds</span>
+        </h2>
+
+        <div class="payment-methods">
+          <div class="payment-method active" data-method="bank">
+            <i class="fas fa-university"></i>
+            <span>Bank Transfer</span>
+          </div>
+          <div class="payment-method" data-method="crypto">
+            <i class="fab fa-bitcoin"></i>
+            <span>Crypto</span>
+          </div>
+          <div class="payment-method" data-method="paypal">
+            <i class="fab fa-paypal"></i>
+            <span>PayPal</span>
+          </div>
+          <div class="payment-method" data-method="skrill">
+            <i class="fas fa-wallet"></i>
+            <span>Skrill</span>
+          </div>
+        </div>
+
+        <!-- Bank Withdrawal Form -->
+        <div id="withdraw-bank-form" class="method-form">
+          <div class="form-group">
+            <label for="withdraw-bank-name">Bank Name</label>
+            <input type="text" id="withdraw-bank-name" class="form-control" placeholder="Enter bank name">
+          </div>
+          <div class="form-group">
+            <label for="withdraw-account-number">Account Number</label>
+            <input type="text" id="withdraw-account-number" class="form-control" placeholder="Enter account number">
+          </div>
+          <div class="form-group">
+            <label for="withdraw-routing-number">Routing Number</label>
+            <input type="text" id="withdraw-routing-number" class="form-control" placeholder="Enter routing number">
+          </div>
+          <div class="form-group">
+            <label for="withdraw-amount">Amount (USD)</label>
+            <input type="number" id="withdraw-amount" class="form-control" placeholder="100.00" min="20">
+          </div>
+          <button class="submit-btn">Request Withdrawal</button>
+        </div>
+
+        <!-- Crypto Withdrawal Form -->
+        <div id="withdraw-crypto-form" class="method-form" style="display: none;">
+          <div class="form-group">
+            <label for="withdraw-crypto-type">Select Cryptocurrency</label>
+            <select id="withdraw-crypto-type" class="form-control">
+              <option value="btc">Bitcoin (BTC)</option>
+              <option value="eth">Ethereum (ETH)</option>
+              <option value="usdt">Tether (USDT)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="withdraw-crypto-amount">Amount (USD)</label>
+            <input type="number" id="withdraw-crypto-amount" class="form-control" placeholder="100.00" min="20">
+          </div>
+          <div class="form-group">
+            <label for="wallet-address">Your Wallet Address</label>
+            <input type="text" id="wallet-address" class="form-control" placeholder="Enter your wallet address">
+          </div>
+          <button class="submit-btn">Request Withdrawal</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">
+          <i class="fas fa-info-circle"></i>
+          <span>Withdrawal Information</span>
+        </h2>
+        <p style="margin-bottom: 15px; font-size: 0.9rem;">Withdrawals are processed within 24-48 hours. Minimum withdrawal amount is $20.</p>
+        <p style="margin-bottom: 15px; font-size: 0.9rem;">Bank transfers may take 3-5 business days to reflect in your account.</p>
+        <p style="font-size: 0.9rem;">For any issues, contact our support team at support@rpsbetting.com</p>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">
+          <i class="fas fa-history"></i>
+          <span>Recent Withdrawals</span>
+        </h2>
+        <div class="transaction-list">
+          <div class="transaction-item withdrawal">
+            <div>
+              <div>Bank Transfer</div>
+              <div style="font-size: 0.8rem; color: var(--text-light);">Today, 10:15</div>
+            </div>
+            <div style="color: var(--secondary); font-weight: 500;">- $200.00</div>
+          </div>
+          <div class="transaction-item withdrawal">
+            <div>
+              <div>Bitcoin Withdrawal</div>
+              <div style="font-size: 0.8rem; color: var(--text-light);">Oct 10, 2025</div>
+            </div>
+            <div style="color: var(--secondary); font-weight: 500;">- $150.00</div>
+          </div>
+          <div class="transaction-item withdrawal">
+            <div>
+              <div>PayPal Withdrawal</div>
+              <div style="font-size: 0.8rem; color: var(--text-light);">Oct 5, 2025</div>
+            </div>
+            <div style="color: var(--secondary); font-weight: 500;">- $300.00</div>
+          </div>
+        </div>
       </div>
     </div>
 
