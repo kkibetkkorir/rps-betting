@@ -642,7 +642,7 @@
   <script src="firebase-config.js"></script>
   <script>
 
-    document.addEventListener("readystatechange", function () {
+    document.addEventListener("DOMContentLoaded", function () {
       const accountId = null;
       // Check authentication state
       auth.onAuthStateChanged((user) => {
@@ -709,16 +709,16 @@
             if (doc.exists) {
               const userData = doc.data();
               document.getElementById('balance').textContent = `$${userData.balance.toFixed(2)}`;
-              document.getElementById('username').value = userData.name;
+              document.getElementById('username').value = userData.usernname;
               document.getElementById('email').value = userData.email;
               accountId = userId;
               /*if(userData.phone) {
                 document.getElementById('phone').value = userData.phone;
               }*/
 
-              const historyList = document.querySelector('.history-list');
               // Game history mapping implementation
               if(userData.gameHistory != null) {
+                const historyList = document.getElementById('historyList');
                 historyList.innerHTML = ''; // Clear existing placeholder items
 
                 // Emoji mapping
@@ -797,7 +797,8 @@
                   historyList.appendChild(historyItem);
                 });
               } else {
-                historyList.innerHTML = `<div>NO HISTORY YET</>`;
+                const historyList = document.getElementById('historyList');
+                historyList.innerHTML = `<div>NO HISTORY YET</div>`;
               }
 
               console.log(userData);
