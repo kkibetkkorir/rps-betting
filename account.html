@@ -641,8 +641,9 @@
 
   <script src="firebase-config.js"></script>
   <script>
-    const accountId = null;
-    //document.addEventListener("DOMContentLoaded", function () {
+
+    document.addEventListener("readystatechange", function () {
+      const accountId = null;
       // Check authentication state
       auth.onAuthStateChanged((user) => {
         if (!user) {
@@ -796,6 +797,9 @@
                   historyItem.appendChild(resultDiv);
                   historyList.appendChild(historyItem);
                 });
+              } else {
+                const historyList = document.querySelector('.history-list');
+                historyList.innerHTML = `<div>NO HISTORY YET</>`;
               }
 
               console.log(userData);
@@ -851,7 +855,7 @@
           }
         }
       })*/
-    //});
+    });
   </script>
 </body>
 </html>
